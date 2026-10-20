@@ -15,8 +15,9 @@ import {
   GitBranch,
   Split
 } from 'lucide-react';
-import { User, UserAnalytics, Review } from '@/lib/types';
+import { User, UserAnalytics, Review, FilmDnaData } from '@/lib/types';
 import MovieCard from '@/components/MovieCard';
+import FilmDnaRadar from '@/components/FilmDnaRadar';
 import { useAuth } from '@/lib/AuthContext';
 import ErrorMessage from '@/components/ErrorMessage';
 
@@ -28,6 +29,8 @@ export default function UserProfilePage() {
 
   const [user, setUser] = useState<User | null>(null);
   const [analytics, setAnalytics] = useState<UserAnalytics | null>(null);
+  const [filmDna, setFilmDna] = useState<FilmDnaData | null>(null);
+  const [isDnaLoading, setIsDnaLoading] = useState(true);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const [filterRating, setFilterRating] = useState<number | null>(null);
@@ -59,6 +62,18 @@ export default function UserProfilePage() {
       setReviews(data.reviews || []);
       setRecommendations(data.recommendations || []);
       setFollowersCount(data.analytics?.followers_count || 0);
+
+      // Fetch FilmDNA Analytics in parallel
+      setIsDnaLoading(true);
+      fetch(`/api/users/${userId}/dna`)
+        .then((r) => r.json())
+        .then((dnaData) => {
+          if (dnaData && !dnaData.error) {
+            setFilmDna(dnaData);
+          }
+        })
+        .catch((e) => console.error('Failed to load FilmDNA:', e))
+        .finally(() => setIsDnaLoading(false));
 
       // Check follow status
       if (!isOwnProfile && currentUser) {
@@ -350,6 +365,9 @@ export default function UserProfilePage() {
               </div>
             )}
           </div>
+
+          {/* FilmDNA 6-Axis Taste Radar */}
+          {filmDna && <FilmDnaRadar dna={filmDna} isLoading={isDnaLoading} />}
         </div>
 
         {/* Right: Reviews Logged by User (7 Cols) */}

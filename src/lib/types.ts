@@ -140,3 +140,47 @@ export interface CineMoodResult {
   meta: DbmsQueryMeta;
 }
 
+export interface FilmDnaAxis {
+  key: string;
+  label: string;
+  value: number; // 0 to 100
+  rawValue: string;
+  description: string;
+}
+
+export interface FilmDnaArchetype {
+  title: string;
+  motto: string;
+  description: string;
+  badgeColor: string;
+}
+
+export interface FilmDnaData {
+  userId: number;
+  username: string;
+  displayName: string;
+  archetype: FilmDnaArchetype;
+  axes: FilmDnaAxis[];
+  metrics: {
+    genreDiversityScore: number;
+    criticSeverityScore: number;
+    watchVolumeScore: number;
+    socialEngagementScore: number;
+    epicPreferenceScore: number;
+    decadeSpreadScore: number;
+    distinctGenresCount: number;
+    totalAvailableGenres: number;
+    avgRating: number;
+    totalReviews: number;
+    epicFilmsCount: number;
+    epicFilmsPct: number;
+    avgRuntimeMinutes: number;
+    decadeSpreadYears: number;
+    minReleaseYear: number;
+    maxReleaseYear: number;
+    socialScore: number;
+  };
+  meta: DbmsQueryMeta;
+}
+
+
