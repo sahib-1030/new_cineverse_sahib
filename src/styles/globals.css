@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --cv-canvas: #06080d;
+  --cv-ink: #06080d;
+  --cv-shell: #0b0f16;
+  --cv-sidebar: #0d121b;
+  --cv-surface: #101620;
+  --cv-surface-2: #121924;
+  --cv-raised: #192231;
+  --cv-border: #2a3547;
+  --cv-text: #f7f8fb;
+  --cv-muted: #9aa7b9;
+  --cv-ember: #ff6b57;
+  --cv-coral: #ff6b57;
+  --cv-accent: #ff6b57;
+  --cv-cream: #f7f8fb;
+  --cv-moss: #ff6b57;
+  --cv-vermilion: #ff6b57;
+  --cv-danger: #ff5c75;
+  --cv-violet: #8b7cff;
+  --cv-cyan: #61d8ff;
+  --cv-success: #42d7a0;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    background: #06080d;
+  }
+
+  body {
+    background:
+      radial-gradient(circle at 76% -12%, rgba(97, 216, 255, 0.08), transparent 32%),
+      radial-gradient(circle at 8% 104%, rgba(139, 124, 255, 0.08), transparent 34%),
+      #06080d;
+    color: #f7f8fb;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");
+  mix-blend-mode: soft-light;
+}
+
+::selection {
+  color: #070a0f;
+  background: #ff6b57;
+}
+
+/* Hide scrollbar for clean UI but allow scroll */
+::-webkit-scrollbar {
+  display: none;
+}
+* {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Focus styles */
+*:focus-visible {
+  outline: 2px solid #61d8ff;
+  outline-offset: 3px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

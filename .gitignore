@@ -1,0 +1,73 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.*
+
+# Yarn zero-install metadata, while keeping useful project-managed files
+.yarn/*
+!.yarn/patches/
+!.yarn/plugins/
+!.yarn/releases/
+!.yarn/sdks/
+!.yarn/versions/
+
+# Build output
+.next/
+out/
+build/
+dist/
+
+# Test and coverage output
+coverage/
+.nyc_output/
+
+# Next.js / TypeScript cache
+*.tsbuildinfo
+
+# Local database files
+.pglite_db/
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+*.pem
+
+# Logs and runtime files
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.pid
+*.pid.lock
+
+# Package manager caches
+.npm/
+.pnpm-store/
+
+# Deployment output
+.vercel/
+
+# Editor and OS files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*.swo
+
+# Design reference assets (not in deploy bundle)
+design-references/
+PRIMARY_NETFLIX_MONITOR_REFERENCE.png
+v2-kit/
+v3-kit/
