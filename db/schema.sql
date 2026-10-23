@@ -7,6 +7,8 @@
 -- ----------------------------------------------------------------------------
 -- 1. DROP EXISTING OBJECTS (FOR CLEAN RE-INSTALLATION)
 -- ----------------------------------------------------------------------------
+DROP VIEW IF EXISTS v_sahib_24bci0292_trending CASCADE;
+DROP VIEW IF EXISTS v_sahib_24bci0292_top_rated CASCADE;
 DROP VIEW IF EXISTS v_recent_activity_feed CASCADE;
 DROP VIEW IF EXISTS v_genre_performance CASCADE;
 DROP VIEW IF EXISTS v_user_leaderboard CASCADE;
@@ -22,6 +24,7 @@ DROP FUNCTION IF EXISTS fn_trg_log_review_activity() CASCADE;
 DROP FUNCTION IF EXISTS fn_trg_update_review_likes() CASCADE;
 DROP FUNCTION IF EXISTS fn_trg_log_watchlist_add() CASCADE;
 DROP FUNCTION IF EXISTS fn_recommend_movies(INT, INT) CASCADE;
+DROP FUNCTION IF EXISTS fn_sahib_24bci0292_user_summary(INT) CASCADE;
 DROP FUNCTION IF EXISTS fn_get_user_analytics(INT) CASCADE;
 DROP PROCEDURE IF EXISTS sp_sahib_24bci0292_add_review(INT, INT, NUMERIC, TEXT) CASCADE;
 
@@ -534,6 +537,39 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+-- FUNCTION: fn_sahib_24bci0292_user_summary
+-- Candidate Tagged User Summary Analytical Routine
+-- Returns key profile and activity metrics with explicit candidate ownership
+CREATE OR REPLACE FUNCTION fn_sahib_24bci0292_user_summary(p_user_id INT)
+RETURNS TABLE (
+    owner VARCHAR(50),
+    user_id INT,
+    username VARCHAR(50),
+    display_name VARCHAR(100),
+    total_reviews INT,
+    avg_rating_given NUMERIC(4, 2),
+    total_watchlists INT,
+    total_followers INT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        'SAHIB_24BCI0292'::VARCHAR(50) AS owner,
+        u.user_id,
+        u.username,
+        u.display_name,
+        COUNT(r.review_id)::INT AS total_reviews,
+        COALESCE(ROUND(AVG(r.rating), 2), 0.00) AS avg_rating_given,
+        (SELECT COUNT(*)::INT FROM watchlists w WHERE w.user_id = u.user_id) AS total_watchlists,
+        (SELECT COUNT(*)::INT FROM follows f WHERE f.following_id = u.user_id) AS total_followers
+    FROM users u
+    LEFT JOIN reviews r ON u.user_id = r.user_id
+    WHERE u.user_id = p_user_id
+    GROUP BY u.user_id, u.username, u.display_name;
+END;
+$$ LANGUAGE plpgsql;
+
+
 -- ----------------------------------------------------------------------------
 -- 6. ADVANCED VIEWS & WINDOW FUNCTIONS
 -- ----------------------------------------------------------------------------
@@ -641,6 +677,30 @@ LEFT JOIN users tu ON (
     al.activity_type = 'FOLLOW' AND al.target_id = tu.user_id
 )
 ORDER BY al.created_at DESC;
+
+
+-- VIEW 5: Top Rated Movies with Candidate Identifier Provenance
+CREATE OR REPLACE VIEW v_sahib_24bci0292_top_rated AS
+SELECT 
+    'SAHIB_24BCI0292'::VARCHAR(50) AS owner,
+    m.movie_id,
+    m.title,
+    m.release_date,
+    m.director,
+    m.avg_rating,
+    m.review_count,
+    DENSE_RANK() OVER (ORDER BY m.avg_rating DESC, m.review_count DESC) AS rank
+FROM movies m
+WHERE m.review_count >= 1
+ORDER BY m.avg_rating DESC, m.review_count DESC;
+
+
+-- VIEW 6: Wrapper around Trending Movies with Candidate Identifier
+CREATE OR REPLACE VIEW v_sahib_24bci0292_trending AS
+SELECT 
+    'SAHIB_24BCI0292'::VARCHAR(50) AS owner,
+    vt.*
+FROM v_trending_movies vt;
 
 
 -- ----------------------------------------------------------------------------

@@ -179,6 +179,15 @@ async function runQa() {
     const feedRes = await db.query('SELECT log_id, activity_type, username FROM v_recent_activity_feed LIMIT 5;');
     assert(feedRes.rows.length > 0, 'v_recent_activity_feed joins correctly without column collision');
 
+    // Test candidate-tagged objects
+    const sahibTopRatedRes = await db.query('SELECT owner, movie_id, title, avg_rating, rank FROM v_sahib_24bci0292_top_rated LIMIT 3;');
+    assert(sahibTopRatedRes.rows.length > 0, 'v_sahib_24bci0292_top_rated renders correctly');
+    assert(sahibTopRatedRes.rows[0]?.owner === 'SAHIB_24BCI0292', `v_sahib_24bci0292_top_rated returns candidate owner column: ${sahibTopRatedRes.rows[0]?.owner}`);
+
+    const sahibUserSummaryRes = await db.query('SELECT * FROM fn_sahib_24bci0292_user_summary($1);', [newUserId]);
+    assert(sahibUserSummaryRes.rows.length > 0, 'fn_sahib_24bci0292_user_summary executes successfully');
+    assert(sahibUserSummaryRes.rows[0]?.owner === 'SAHIB_24BCI0292', `fn_sahib_24bci0292_user_summary returns owner: ${sahibUserSummaryRes.rows[0]?.owner}`);
+
     // Test 10: Watchlist & trigger trg_log_watchlist_add
     console.log('\n🔖 Test 10: Watchlist items & trg_log_watchlist_add trigger');
     const listInsert = await db.query(`
