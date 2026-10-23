@@ -7,10 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:reset": "node scripts/db-reset.js",
-    "db:init": "node scripts/db-reset.js",
-    "db:fixture": "node scripts/seed-countercut-fixture.js",
-    "test": "node scripts/qa-verify.js"
+    "db:reset": "node --max-old-space-size=4096 scripts/db-reset.js",
+    "db:init": "node --max-old-space-size=4096 scripts/db-reset.js",
+    "db:fixture": "node --max-old-space-size=4096 scripts/seed-countercut-fixture.js",
+    "test": "node --max-old-space-size=4096 scripts/qa-verify.js"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.2.14",

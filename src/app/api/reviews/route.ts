@@ -104,7 +104,11 @@ export async function POST(request: NextRequest) {
     const cleanReviewText = typeof reviewText === 'string' ? reviewText.trim() : '';
     const cleanSpoilers = Boolean(hasSpoilers ?? containsSpoilers ?? false);
 
-    // Perform authentic mutation with server-side CineTrace provenance tracking
+    // Call real stored procedure via prisma.$executeRaw with a tagged template and explicit casts
+    const { prisma } = await import('@/lib/prisma');
+    await prisma.$executeRaw`CALL sp_sahib_24bci0292_add_review(${effectiveUserId}::int, ${parsedMovieId}::int, ${numRating}::numeric, ${cleanReviewText}::text);`;
+
+    // Perform authentic mutation snapshotting with server-side CineTrace provenance tracking
     const { captureReviewTrace } = await import('@/lib/trace');
     const traceResult = await captureReviewTrace({
       userId: effectiveUserId,

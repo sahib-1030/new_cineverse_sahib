@@ -136,6 +136,27 @@ async function runQa() {
     const emptyReviewCheck = await db.query('SELECT review_text FROM reviews WHERE user_id = $1 AND movie_id = $2;', [newUserId, targetMovieId]);
     assert(emptyReviewCheck.rows[0]?.review_text === '', 'Reviews accept empty string text (rating-only reviews allowed)');
 
+    // Test 6b: Stored Procedure - sp_sahib_24bci0292_add_review
+    console.log('\n⚙️ Test 6b: Real PostgreSQL Stored Procedure sp_sahib_24bci0292_add_review');
+    await db.query(`CALL sp_sahib_24bci0292_add_review($1::int, $2::int, $3::numeric, $4::text);`, [
+      newUserId,
+      2,
+      9.0,
+      'Stored procedure review submission test'
+    ]);
+    const procReviewCheck = await db.query('SELECT rating, review_text FROM reviews WHERE user_id = $1 AND movie_id = 2;', [newUserId]);
+    assert(Number(procReviewCheck.rows[0]?.rating) === 9.0, 'sp_sahib_24bci0292_add_review atomically created review');
+    assert(procReviewCheck.rows[0]?.review_text === 'Stored procedure review submission test', 'Stored procedure preserved review text');
+
+    let caughtInvalidRating = false;
+    try {
+      await db.query(`CALL sp_sahib_24bci0292_add_review($1::int, 2::int, 15.0::numeric, 'fail'::text);`, [newUserId]);
+    } catch {
+      caughtInvalidRating = true;
+    }
+    assert(caughtInvalidRating, 'sp_sahib_24bci0292_add_review rejects ratings out of range (> 10.0)');
+    await db.query('DELETE FROM reviews WHERE user_id = $1 AND movie_id = 2;', [newUserId]);
+
     // Test 7: Stored Function - fn_get_user_analytics precision
     console.log('\n📊 Test 7: PL/pgSQL fn_get_user_analytics numeric precision');
     const analyticsRes = await db.query('SELECT fn_get_user_analytics($1) AS analytics;', [newUserId]);

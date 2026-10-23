@@ -23,6 +23,7 @@ DROP FUNCTION IF EXISTS fn_trg_update_review_likes() CASCADE;
 DROP FUNCTION IF EXISTS fn_trg_log_watchlist_add() CASCADE;
 DROP FUNCTION IF EXISTS fn_recommend_movies(INT, INT) CASCADE;
 DROP FUNCTION IF EXISTS fn_get_user_analytics(INT) CASCADE;
+DROP PROCEDURE IF EXISTS sp_sahib_24bci0292_add_review(INT, INT, NUMERIC, TEXT) CASCADE;
 
 DROP TABLE IF EXISTS app_meta CASCADE;
 DROP TABLE IF EXISTS activity_logs CASCADE;
@@ -339,6 +340,55 @@ EXECUTE FUNCTION fn_trg_log_watchlist_add();
 -- ----------------------------------------------------------------------------
 -- 5. STORED PROCEDURES & ANALYTICAL FUNCTIONS
 -- ----------------------------------------------------------------------------
+
+-- STORED PROCEDURE: sp_sahib_24bci0292_add_review
+-- Author: Sahib Singh (Register No: 24BCI0292, Tag: SAHIB_24BCI0292)
+-- Description: Validates input, inserts or updates the review atomically,
+-- and relies on existing triggers (trg_update_movie_rating) for aggregates.
+CREATE OR REPLACE PROCEDURE sp_sahib_24bci0292_add_review(
+    p_user_id INT,
+    p_movie_id INT,
+    p_rating NUMERIC,
+    p_text TEXT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    -- 1. Input Validation
+    IF p_user_id IS NULL THEN
+        RAISE EXCEPTION 'User ID cannot be NULL';
+    END IF;
+
+    IF p_movie_id IS NULL THEN
+        RAISE EXCEPTION 'Movie ID cannot be NULL';
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM users WHERE user_id = p_user_id) THEN
+        RAISE EXCEPTION 'User with ID % does not exist', p_user_id;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM movies WHERE movie_id = p_movie_id) THEN
+        RAISE EXCEPTION 'Movie with ID % does not exist', p_movie_id;
+    END IF;
+
+    IF p_rating IS NULL OR p_rating < 1.0 OR p_rating > 10.0 THEN
+        RAISE EXCEPTION 'Rating must be between 1.0 and 10.0 (received %)', p_rating;
+    END IF;
+
+    -- 2. Upsert Review (Atomic insert or update)
+    -- trg_update_movie_rating automatically recalculates movies.avg_rating & review_count
+    INSERT INTO reviews (user_id, movie_id, rating, review_text, updated_at)
+    VALUES (p_user_id, p_movie_id, ROUND(p_rating, 1), COALESCE(TRIM(p_text), ''), CURRENT_TIMESTAMP)
+    ON CONFLICT (user_id, movie_id)
+    DO UPDATE SET
+        rating = EXCLUDED.rating,
+        review_text = EXCLUDED.review_text,
+        updated_at = CURRENT_TIMESTAMP;
+
+END;
+$$;
+
+
 
 -- FUNCTION: Genre-Affinity & Platform Fallback Recommendation Engine
 CREATE OR REPLACE FUNCTION fn_recommend_movies(p_user_id INT, p_limit INT DEFAULT 6)

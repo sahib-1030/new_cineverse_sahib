@@ -317,3 +317,5 @@ export async function resetDatabase(): Promise<{ success: boolean; message: stri
 
   return { success: true, message: 'Database cleanly reseeded with fresh PostgreSQL schema.' };
 }
+
+export { prisma } from './prisma';
