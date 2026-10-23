@@ -1,10 +1,22 @@
 const { PGlite } = require('@electric-sql/pglite');
+const { Pool } = require('pg');
 const path = require('path');
 
 const dbPath = path.join(__dirname, '..', '.pglite_db');
-const db = new PGlite(dbPath);
 
-async function seedCountercutFixtures() {
+async function seedCountercutFixtures(customDb = null) {
+  let db = customDb;
+  let ownPool = null;
+
+  if (!db) {
+    if (process.env.DATABASE_URL) {
+      ownPool = new Pool({ connectionString: process.env.DATABASE_URL });
+      db = ownPool;
+    } else {
+      db = new PGlite(dbPath);
+    }
+  }
+
   console.log('🎬 Seeding idempotent Countercut investigation demo fixtures...');
 
   // 1. Ensure Alex Rivera (user_id = 1) has contrasting ratings in Sci-Fi:
@@ -94,6 +106,10 @@ async function seedCountercutFixtures() {
   console.log('✅ Countercut demo fixtures seeded successfully and idempotently.');
   console.log('   - Alex Rivera (User #1) now has personal contrast: Interstellar (10.0) vs Arrival (4.5)');
   console.log('   - Elena Rostov (User #4) is opposite on Oppenheimer (4.0 vs 9.6) with 5 shared films (96.4% historical agreement)');
+
+  if (ownPool) {
+    await ownPool.end().catch(() => {});
+  }
 }
 
 if (require.main === module) {

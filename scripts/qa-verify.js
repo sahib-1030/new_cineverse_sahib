@@ -1,10 +1,12 @@
 
 const { PGlite } = require('@electric-sql/pglite');
+const { Pool } = require('pg');
 const path = require('path');
 const crypto = require('crypto');
 
-const dbPath = path.join(__dirname, '..', '.pglite_db');
-const db = new PGlite(dbPath);
+let db;
+let pool = null;
+const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/cineverse';
 
 const SESSION_SECRET = 'cineverse-secure-session-secret-key-2026';
 
@@ -60,6 +62,18 @@ async function runQa() {
   console.log('🧪 Starting CineVerse QA Verification Suite...\n');
   let passed = 0;
   let failed = 0;
+
+  try {
+    pool = new Pool({ connectionString, connectionTimeoutMillis: 1500 });
+    await pool.query('SELECT 1;');
+    db = pool;
+    console.log(`🔌 Connected to PostgreSQL (${connectionString.replace(/:[^:@]*@/, ':****@')})\n`);
+  } catch {
+    if (pool) { await pool.end().catch(() => {}); pool = null; }
+    const dbPath = path.join(__dirname, '..', '.pglite_db');
+    db = new PGlite(dbPath);
+    console.log('⚡ Running QA against embedded fallback (.pglite_db)\n');
+  }
 
   function assert(condition, message) {
     if (condition) {
@@ -693,11 +707,15 @@ async function runQa() {
     console.log('  🧹 Cleaned up Test 15 test watchlist');
 
     console.log('\n=============================================');
-    console.log(`🎉 QA Suite Completed: ${passed} PASSED, ${failed} FAILED`);
-    console.log('=============================================\n');
+    if (pool) {
+      await pool.end().catch(() => {});
+    }
 
     process.exit(failed > 0 ? 1 : 0);
   } catch (err) {
+    if (pool) {
+      await pool.end().catch(() => {});
+    }
     console.error('QA Suite encountered unexpected fatal error:', err);
     process.exit(1);
   }
