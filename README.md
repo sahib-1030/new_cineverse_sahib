@@ -112,47 +112,73 @@ Notable database behavior includes:
 ```mermaid
 flowchart LR
     UI[Next.js App Router<br/>React UI] --> API[Route handlers<br/>and server actions]
-    API --> DAL[Typed data access<br/>src/lib/db.ts]
-    DAL -->|zero configuration| PGLITE[(PGlite<br/>embedded Postgres)]
-    DAL -->|DATABASE_URL| POSTGRES[(PostgreSQL<br/>Neon / Supabase / local)]
-    POSTGRES --> DB[Schema · views · functions<br/>triggers · trace records]
-    PGLITE --> DB
+    API --> DAL[Typed PostgreSQL Pool<br/>src/lib/db.ts]
+    DAL -->|DATABASE_URL| POSTGRES[(PostgreSQL 16<br/>Docker / Cloud / Local)]
+    POSTGRES --> DB[Schema · views · functions<br/>triggers · procedures · trace records]
     DB --> TRACE[CineTrace · DB Studio<br/>Countercut · Query Lens]
     TRACE --> UI
 ```
 
-The same application can run against an embedded PGlite database or an external PostgreSQL instance. That keeps first-run setup tiny while preserving the SQL features the product is designed to demonstrate.
+CineVerse standardizes on a genuine **PostgreSQL 16** server (run via Docker Compose or external cloud database) as the primary runtime engine. Standardizing on PostgreSQL ensures zero impedance mismatch with standard Object-Relational Mappers (ORMs like Prisma) and guarantees consistent support for stored procedures, ACID transactions, and triggers. PGlite has been phased out from the Next.js runtime path.
 
 ## Stack
 
 | Layer | Technology |
 | --- | --- |
-| Application | Next.js 14 App Router, React 18, TypeScript 5 |
+| Application | Next.js 14 App Router (Standalone build), React 18, TypeScript 5 |
 | Interface | Tailwind CSS, Framer Motion, Lucide, cmdk |
 | Data workbench | Monaco Editor |
-| Database | PostgreSQL or embedded PGlite |
+| Database | PostgreSQL 16 (Containerized via Docker Compose) |
+| Containerization | Multi-stage Alpine Dockerfile (non-root `nextjs`), Docker Compose |
 | Validation and AI | Zod, Google GenAI integration |
 | Quality | TypeScript, ESLint, custom 71-check QA suite |
 
-## Run locally
+## Quick Start (Docker Compose)
 
-Requirements: Node.js 18.17+ and npm.
+The recommended way to run CineVerse and its PostgreSQL 16 database is via Docker Compose:
 
 ```bash
+# 1. Clone repository
 git clone https://github.com/sahib-1030/new_cineverse_sahib.git
 cd new_cineverse_sahib
-npm install
-cp .env.example .env.local
-npm run dev
+
+# 2. Configure environment
+cp .env.example .env
+
+# 3. Start PostgreSQL 16 & Next.js standalone container
+docker compose up --build -d
+
+# 4. Initialize schema and seed data on PostgreSQL
+npm run db:reset
 ```
 
-Open [http://localhost:3000](http://localhost:3000). CineVerse uses PGlite automatically when `DATABASE_URL` is not set, so an external database is optional.
+Open [http://localhost:3000](http://localhost:3000).
+
+## Local Development (Without Docker App Container)
+
+If you prefer to run Next.js directly on host Node:
+
+```bash
+npm install
+cp .env.example .env
+# Start PostgreSQL database in Docker
+docker compose up -d db
+
+# Apply schema & seed data
+npm run db:reset
+
+# Start Next.js development server
+npm run dev
+```
 
 ### Environment variables
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `DATABASE_URL` | No | Connect to PostgreSQL instead of the embedded PGlite database |
+| `DATABASE_URL` | Yes (defaults to localhost:5432) | Connect to PostgreSQL (`postgresql://postgres:postgres@localhost:5432/cineverse`) |
+| `POSTGRES_USER` | No | PostgreSQL user for Docker service (default: `postgres`) |
+| `POSTGRES_PASSWORD` | No | PostgreSQL password for Docker service (default: `postgres`) |
+| `POSTGRES_DB` | No | PostgreSQL database name for Docker service (default: `cineverse`) |
 | `SESSION_SECRET` | Recommended | Signs application sessions; use a long random value outside local development |
 | `GEMINI_API_KEY` | No | Enables live model-backed Countercut generation |
 | `GEMINI_MODEL` | No | Overrides the configured Gemini model |
