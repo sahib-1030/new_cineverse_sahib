@@ -20,6 +20,7 @@ import MovieCard from '@/components/MovieCard';
 import FilmDnaRadar from '@/components/FilmDnaRadar';
 import { useAuth } from '@/lib/AuthContext';
 import ErrorMessage from '@/components/ErrorMessage';
+import SimilarCinephiles from '@/components/community/SimilarCinephiles';
 
 export default function UserProfilePage() {
   const params = useParams();
@@ -445,6 +446,11 @@ export default function UserProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* Kindred Spirits: Similar Cinephile Recommendations */}
+      <section className="pt-4">
+        <SimilarCinephiles />
+      </section>
     </div>
   );
 }

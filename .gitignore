@@ -71,3 +71,16 @@ design-references/
 PRIMARY_NETFLIX_MONITOR_REFERENCE.png
 v2-kit/
 v3-kit/
+
+# Report generation scratch files
+__pycache__/
+*.pyc
+extracted_images/
+report_images/
+report_original.docx
+convert.ps1
+convert_to_pdf.py
+build_full_report.py
+report_builder_helpers.py
+*.docx
+*.pdf

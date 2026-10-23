@@ -183,4 +183,21 @@ export interface FilmDnaData {
   meta: DbmsQueryMeta;
 }
 
+export interface RecommendedUser {
+  user_id: number;
+  username: string;
+  display_name: string;
+  avatar_url?: string;
+  bio?: string;
+  total_reviews: number;
+  avg_rating: number;
+  followers_count: number;
+  shared_count: number;
+  similarity_score: number;
+  similarity_pct?: number;
+  shared_genre_names: string[];
+  match_rank: number;
+  is_following?: boolean;
+}
+
 
