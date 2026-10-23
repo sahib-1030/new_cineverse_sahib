@@ -10,6 +10,12 @@ async function seedCountercutFixtures() {
   // 1. Ensure Alex Rivera (user_id = 1) has contrasting ratings in Sci-Fi:
   // Interstellar (id: 2) -> 10.0, Arrival (id: 18) -> 4.5
   // The Dark Knight (id: 3) -> 9.8, Dune: Part Two (id: 4) -> 9.7, Blade Runner 2049 (id: 13) -> 9.6
+  await db.query(`
+    INSERT INTO reviews (user_id, movie_id, rating, review_text, has_spoilers, updated_at)
+    VALUES (1, 2, 10.0, 'Transcendent. The docking scene alone is one of the most suspenseful sequences ever put to 70mm film.', FALSE, CURRENT_TIMESTAMP)
+    ON CONFLICT (user_id, movie_id) DO UPDATE SET rating = 10.0;
+  `);
+
   const alexReviews = [
     {
       movieId: 18,

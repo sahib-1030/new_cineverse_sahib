@@ -98,6 +98,10 @@ async function runQa() {
     assert(demoUserRes.rows.length === 1, 'Alex Rivera demo account found');
     assert(verifyPassword('password123', demoUserRes.rows[0].password_hash), 'Alex Rivera demo password123 verified');
 
+    // Verify absence of fake admin / fake identification rows
+    const fakeAdminCheck = await db.query("SELECT user_id, username FROM users WHERE user_id = 999 OR username = '24bci0292_sahib';");
+    assert(fakeAdminCheck.rows.length === 0, 'No fake admin accounts (user_id 999 / 24bci0292_sahib) exist in users table');
+
     // Test 4: Sequence alignment & New User Registration simulation
     console.log('\n👤 Test 4: User creation & SERIAL sequence safety');
     const userSeqRes = await db.query(`

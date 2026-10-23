@@ -291,7 +291,7 @@ SELECT 'SAHIB_24BCI0292' AS owner, now();
 
 -- 7.1 Successful Stored Procedure Call
 CALL sp_sahib_24bci0292_add_review(
-    1::INT,
+    3::INT,
     2::INT,
     9.5::NUMERIC,
     'Procedure test: Stunning visual scale and Hans Zimmer score.'::TEXT
@@ -307,7 +307,7 @@ SELECT
     r.review_text,
     r.updated_at
 FROM reviews r
-WHERE r.user_id = 1 AND r.movie_id = 2;
+WHERE r.user_id = 3 AND r.movie_id = 2;
 
 -- 7.2 Failing Stored Procedure Call (Input Validation: Rating Out of Range > 10.0)
 -- Handled inside a PL/pgSQL block to demonstrate expected exception without aborting script.
