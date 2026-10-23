@@ -60,6 +60,7 @@ CREATE TABLE users (
     email VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     display_name VARCHAR(100) NOT NULL,
+    role VARCHAR(20) NOT NULL DEFAULT 'USER' CHECK (role IN ('USER', 'ADMIN', 'MODERATOR')),
     bio TEXT,
     avatar_url VARCHAR(500) DEFAULT 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
     banner_url VARCHAR(500) DEFAULT 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1200',

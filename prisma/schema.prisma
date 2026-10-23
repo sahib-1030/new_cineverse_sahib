@@ -16,6 +16,7 @@ model User {
   email         String    @unique @db.VarChar(100)
   password_hash String    @db.VarChar(255)
   display_name  String    @db.VarChar(100)
+  role          String    @default("USER") @db.VarChar(20)
   bio           String?   @db.Text
   avatar_url    String?   @db.VarChar(500)
   banner_url    String?   @db.VarChar(500)

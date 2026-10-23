@@ -24,6 +24,9 @@ INSERT INTO users (user_id, username, email, password_hash, display_name, bio, a
 (6, 'chloe_b', 'chloe@cineverse.io', 'scrypt:a9c1e0d3b4f5e6a7b8c9d0e1f2a3b4c5:b5aca4f901fde61bf3b6f717b8689609c4dc177d3b3b37a5e87641825edacb178bc4577c685cbbec7967ef206ca3588062552c2f368f3777ce1d75c0ea1ff801', 'Chloe Bennett', 'Animation geek and indie drama specialist. Studio Ghibli forever.', 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150', 'https://images.unsplash.com/photo-1524712245354-2c4e5e7121c0?w=1200')
 ON CONFLICT (user_id) DO NOTHING;
 
+-- Assign Admin role to primary administrator (Alex Rivera)
+UPDATE users SET role = 'ADMIN' WHERE user_id = 1;
+
 -- 3. SEED MOVIES
 INSERT INTO movies (tmdb_id, title, tagline, overview, release_date, runtime, poster_url, backdrop_url, trailer_url, director) VALUES
 (27205, 'Inception', 'Your mind is the scene of the crime.', 'A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.', '2010-07-16', 148, 'https://image.tmdb.org/t/p/w500/xlaY2zyzMfkhk0HSC5VUwzoZPU1.jpg', 'https://image.tmdb.org/t/p/original/8ZTVqvKDQ8emSGUEMjsS4yHAwrp.jpg', 'https://www.youtube.com/watch?v=YoHD9XEInc0', 'Christopher Nolan'),
