@@ -11,7 +11,8 @@
     "db:init": "node --max-old-space-size=4096 scripts/db-reset.js",
     "db:fixture": "node --max-old-space-size=4096 scripts/seed-countercut-fixture.js",
     "test": "node --max-old-space-size=4096 scripts/qa-verify.js",
-    "demo:sql": "node --max-old-space-size=4096 scripts/run-sql-demo.js"
+    "demo:sql": "node --max-old-space-size=4096 scripts/run-sql-demo.js",
+    "docs:dictionary": "node --max-old-space-size=4096 scripts/generate-data-dictionary.js"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.2.14",
